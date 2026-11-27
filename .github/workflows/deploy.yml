@@ -1,15 +1,18 @@
 name: Deploy Flutter Web to GitHub Pages
 
+# Executa sempre que houver push na branch main
 on:
   push:
     branches:
       - main
 
+# Permissões mínimas necessárias para publicar no GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
+# Evita que dois deploys rodem ao mesmo tempo
 concurrency:
   group: "pages"
   cancel-in-progress: false
@@ -22,32 +25,40 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
+      # 1. Baixa o código do seu repositório
       - name: Checkout repository
         uses: actions/checkout@v5
 
+      # 2. Clona o Flutter stable e ativa o comando flutter agora e nos próximos passos
       - name: Install Flutter SDK
         run: |
           git clone https://github.com/flutter/flutter.git -b stable --depth 1 $HOME/flutter
+          export PATH="$HOME/flutter/bin:$PATH"
           echo "$HOME/flutter/bin" >> $GITHUB_PATH
           flutter --version
 
+      # 3. Ativa o alvo Web e instala as dependências do pubspec.yaml
       - name: Enable web and get dependencies
         run: |
           flutter config --enable-web
           flutter pub get
 
+      # 4. Prepara o GitHub Pages e pega o caminho base (/game_hub/)
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v6
 
+      # 5. Compila o aplicativo Flutter para Web
       - name: Build Flutter Web
         run: flutter build web --release --base-href "${{ steps.pages.outputs.base_path }}/"
 
+      # 6. Empacota somente a pasta compilada build/web
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
         with:
           path: "build/web"
 
+      # 7. Publica no GitHub Pages
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
