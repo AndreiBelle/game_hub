@@ -1,88 +1,60 @@
+import 'dart:convert';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import '../models/game_detail_model.dart';
 import '../models/game_model.dart';
 
-class GameService extends GetConnect {
+class GameService extends GetxService {
   final String baseUrl = 'https://www.freetogame.com/api';
-
-  @override
-  void onInit() {
-    httpClient.baseUrl = baseUrl;
-    httpClient.timeout = const Duration(seconds: 15);
-    super.onInit();
-  }
 
   Future<List<GameModel>> getGames({
     String? platform,
     String? category,
     String? sortBy,
   }) async {
-    try {
-      final Map<String, String> queryParameters = {};
+    final Map<String, String> queryParameters = {};
 
-      if (platform != null && platform.isNotEmpty && platform != 'all') {
-        queryParameters['platform'] = platform;
-      }
-
-      if (category != null && category.isNotEmpty && category != 'all') {
-        queryParameters['category'] = category;
-      }
-
-      if (sortBy != null && sortBy.isNotEmpty) {
-        queryParameters['sort-by'] = sortBy;
-      }
-
-      final Response<dynamic> response = await get(
-        '/games',
-        query: queryParameters.isEmpty ? null : queryParameters,
-      );
-
-      if (response.status.hasError || response.statusCode != 200) {
-        throw Exception('Erro na requisição: status ${response.statusCode}');
-      }
-
-      final dynamic body = response.body;
-      if (body is! List) {
-        throw Exception('Formato de resposta inválido');
-      }
-
-      final List<GameModel> games = [];
-      for (final dynamic item in body) {
-        if (item is Map<String, dynamic>) {
-          games.add(GameModel.fromJson(item));
-        } else if (item is Map) {
-          games.add(GameModel.fromJson(Map<String, dynamic>.from(item)));
-        }
-      }
-
-      return games;
-    } catch (error) {
-      throw Exception('Falha ao carregar jogos: $error');
+    if (platform != null && platform.isNotEmpty && platform != 'all') {
+      queryParameters['platform'] = platform;
     }
+
+    if (category != null && category.isNotEmpty && category != 'all') {
+      queryParameters['category'] = category;
+    }
+
+    if (sortBy != null && sortBy.isNotEmpty) {
+      queryParameters['sort-by'] = sortBy;
+    }
+
+    final Uri uri = Uri.parse('$baseUrl/games').replace(
+      queryParameters: queryParameters.isEmpty ? null : queryParameters,
+    );
+
+    final response = await http.get(uri);
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data
+          .map((item) => GameModel.fromJson(Map<String, dynamic>.from(item)))
+          .toList();
+    }
+
+    throw Exception('Erro ao buscar jogos');
   }
 
   Future<GameDetailModel> getGameById(int id) async {
-    try {
-      final Response<dynamic> response = await get(
-        '/game',
-        query: {'id': id.toString()},
-      );
+    final Uri uri = Uri.parse('$baseUrl/game').replace(
+      queryParameters: {'id': id.toString()},
+    );
 
-      if (response.status.hasError || response.statusCode != 200) {
-        throw Exception('Erro na requisição: status ${response.statusCode}');
-      }
+    final response = await http.get(uri);
 
-      final dynamic body = response.body;
-      if (body is Map<String, dynamic>) {
-        return GameDetailModel.fromJson(body);
-      }
-      if (body is Map) {
-        return GameDetailModel.fromJson(Map<String, dynamic>.from(body));
-      }
-
-      throw Exception('Formato de resposta inválido');
-    } catch (error) {
-      throw Exception('Falha ao carregar detalhes do jogo: $error');
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data =
+      Map<String, dynamic>.from(jsonDecode(response.body));
+      return GameDetailModel.fromJson(data);
     }
+
+    throw Exception('Erro ao buscar detalhes do jogo');
   }
 }
