@@ -1,17 +1,9 @@
-# parking_spot
+# Game HUB Projeto Flutter
 
-A new Flutter project.
+Trabalho final realizado para a disciplina de Desenvolvimento de Sistemas Móveis, utilizei de base projeto Parking Spot realizado o consumido de uma api disponibilizada pelo professor. 
 
-## Getting Started
+## Ideia desse Trabalho
 
-This project is a starting point for a Flutter application.
+Simular um site com catálogos de jogos gratuitos, link para downloads, descrição dos jogos, imagens dos mesmos, plataforma do jogo e requisitos para rodar.
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+###  Utilizado POSTAMAN para testes e verificações de retornos da API, GetX, Flutter e IDE Android Studio.
